@@ -1,0 +1,199 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "skuType": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "clusterName": {
+      "type": "string"
+    },
+    "authenticationType": {
+      "type": "string"
+    },
+    "adminUsername": {
+      "type": "string"
+    },
+    "adminPassword": {
+      "type": "securestring"
+    },
+    "sshPublicKey": {
+      "type": "string"
+    },
+    "sshKeyPath": {
+      "type": "string"
+    },
+    "vmSize": {
+      "type": "string"
+    },
+    "subnetId": {
+      "type": "string"
+    },
+    "virtualMachineScaleSetsApiVersion": {
+      "type": "string"
+    },
+    "loadBalancerBackendPoolId": {
+      "type": "string"
+    },
+    "networkSecurityGroupId": {
+      "type": "string"
+    },
+    "instanceCount": {
+      "type": "int"
+    },
+    "bootDiagnosticsUri": {
+      "type": "string"
+    },
+    "loadBalancerInboundNatPoolIds": {
+      "type": "array"
+    }
+  },
+  "variables": {
+    "clusterName": "[toLower(parameters('clusterName'))]",
+    "virtualMachineScaleSetName": "vtm-pre-vmss-01",
+    "networkInterfaceName": "[concat(variables('clusterName'), '-nic-01')]",
+    "ipConfigName": "[concat(variables('clusterName'),'-ipconfig')]",
+    "linuxConfiguration": {
+      "disablePasswordAuthentication": 
+        "[equals(parameters('authenticationType'),'sshPublicKey')]",
+      "ssh": {
+        "publicKeys": [
+          {
+            "path": "[parameters('sshKeyPath')]",
+            "keyData": "[parameters('sshPublicKey')]"
+          }
+        ]
+      }
+    },
+    "osprofile": {
+	  "computerNamePrefix": "[concat(variables('clusterName'), 'pre')]",
+      "adminUsername": "[parameters('adminUsername')]",
+      "adminPassword": 
+        "[if(equals(parameters('authenticationType'),'sshPublicKey'),json('null'),parameters('adminPassword'))]",
+      "linuxConfiguration": "[if(equals(parameters('authenticationType'),'password'),json('null'),variables('linuxConfiguration'))]"
+    },
+    "sku_products": {
+      "vtm-dev-byol": "pulse-virtual-traffic-manager",
+      "vtm-csp-500-l": "pulse-virtual-traffic-manager",
+      "vtm-csp-500-l2": "pulse-virtual-traffic-manager",
+      "vtm-csp-500-m1": "pulse-virtual-traffic-manager",
+      "vtm-csub-1000-l": "pulse-virtual-traffic-manager",
+      "vtm-csub-1000-m": "pulse-virtual-traffic-manager",
+      "vtm-csub-1000-h": "pulse-virtual-traffic-manager",
+      "vtm-csub-2000-l": "pulse-virtual-traffic-manager",
+      "vtm-csub-1000-l-waf": "pulse-virtual-traffic-manager-with-waf",
+      "vtm-csub-1000-m-waf": "pulse-virtual-traffic-manager-with-waf",
+      "vtm-csub-1000-h-waf": "pulse-virtual-traffic-manager-with-waf",
+      "vtm-csub-2000-l-waf": "pulse-virtual-traffic-manager-with-waf",
+      "safpx-csub-1000": "pulse-virtual-web-application-firewall"
+    },
+    "version_suffix": {
+      "latest": "2",
+      "1.180200.0": "2",
+      "1.180100.0": "2",
+      "1.170400.0": "",
+      "1.170300.0": "",
+      "1.170202.0": "",
+      "1.170201.0": "",
+      "1.170200.0": "",
+      "1.100403.1": "",
+      "1.100402.0": "",
+      "1.100401.0": "",
+      "1.100400.0": ""
+    },
+    "imageSkuVtm": "[parameters('skuType')]",
+    "imagePublisherVtm": "pulse-secure",
+    "imageOfferVtm": "[concat(variables('sku_products')[parameters('skuType')],variables('version_suffix')[parameters('version')])]",
+    "vtmMarketplacePlan": {
+      "name": "[parameters('skuType')]",
+      "publisher": "[variables('imagePublisherVtm')]",
+      "product": "[variables('imageOfferVtm')]"
+    },
+    "imageReferenceVtm": {
+      "publisher": "[variables('imagePublisherVtm')]",
+      "offer": "[variables('imageOfferVtm')]",
+      "sku": "[parameters('skuType')]",
+      "version": "[parameters('version')]"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "[parameters('virtualMachineScaleSetsApiVersion')]",
+      "type": "Microsoft.Compute/virtualMachineScaleSets",
+      "name": "[variables('virtualMachineScaleSetName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+      ],
+      "sku": {
+        "name": "[parameters('vmSize')]",
+        "tier": "Standard",
+        "capacity": "[parameters('instanceCount')]"
+      },
+      "plan": "[variables('vtmMarketplacePlan')]",
+      "properties": {
+        "overprovision": "false",
+        "upgradePolicy": {
+          "mode": "Manual"
+        },
+        "virtualMachineProfile": {
+          "storageProfile": {
+            "osDisk": {
+              "caching": "ReadWrite",
+              "createOption": "FromImage"
+            },
+            "imageReference": "[variables('imageReferenceVtm')]"
+          },
+          "diagnosticsProfile": {
+            "bootDiagnostics": {
+              "enabled": true,
+              "storageUri": "[parameters('bootDiagnosticsUri')]"
+            }
+          },
+          "osProfile": "[variables('osprofile')]",
+          "networkProfile": {
+            "networkInterfaceConfigurations": [
+              {
+                "name": "[variables('networkInterfaceName')]",
+                "properties": {
+                  "primary": true,
+                  "ipConfigurations": [
+                    {
+                      "name": "[variables('ipConfigName')]",
+                      "properties": {
+                        "subnet": {
+                          "id": "[parameters('subnetId')]"
+                        },
+                        "loadBalancerBackendAddressPools": [
+                          {
+                            "id": "[parameters('loadBalancerBackendPoolId')]"
+                          }
+                        ],
+                        "loadBalancerInboundNatPools": "[parameters('loadBalancerInboundNatPoolIds')]"
+                      }
+                    }
+                  ],
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "virtualMachineScaleSetId": {
+      "value": "[resourceId('Microsoft.Storage/virtualMachineScaleSets',variables('virtualMachineScaleSetName'))]",
+      "type": "string"
+    },
+    "virtualMachineScaleSetName": {
+      "value": "[variables('virtualMachineScaleSetName')]",
+      "type": "string"
+    }
+  }
+}
