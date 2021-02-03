@@ -127,6 +127,7 @@
 	  "sku": {
                 "name": "Standard",
                 "tier": "Regional"
+		},
       "dependsOn": [
       ],
                   "properties": {
