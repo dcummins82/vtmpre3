@@ -50,6 +50,9 @@
     "bootDiagnosticsUri": {
       "type": "string"
     },
+	 "zone": {
+     "type": "array"
+    },
     "loadBalancerInboundNatPoolIds": {
       "type": "array"
     }
@@ -184,6 +187,7 @@
           }
         }
       }
+	  "zones": "[parameters('zone')]"
     }
   ],
   "outputs": {
