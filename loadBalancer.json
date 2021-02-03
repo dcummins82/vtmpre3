@@ -38,6 +38,12 @@
     "loadBalancerName": {
       "type": "string"
     },
+	 "sku": {
+      "type": "string"
+    },
+	"tier": {
+      "type": "string"
+    },
     "networkSecurityGroupName": {
       "type": "string"
     },
@@ -76,7 +82,9 @@
     "adminNatBackendPort": 9090,
     "restNatPoolName": "restNatPool",
     "restNatEndPort": "[add(parameters('restNatStartPort'),63)]",
-    "restNatBackendPort": 9070
+    "restNatBackendPort": 9070,
+	"sku": "Standard",
+	"tier": "Regional"
   },
   "resources": [
     {
@@ -93,10 +101,6 @@
           "location": {
             "value": "[parameters('location')]"
           },
-		       "sku": {
-            "name": "Standard",
-             "tier": "Regional"
-           },
           "publicIPName": {
             "value": "[parameters('clusterIPAddressName')]"
           },
@@ -120,12 +124,16 @@
       "name": "[parameters('loadBalancerName')]",
       "type": "Microsoft.Network/loadBalancers",
       "location": "[parameters('location')]",
+	  "sku": {
+                "name": "Standard",
+                "tier": "Regional"
       "dependsOn": [
       ],
                   "properties": {
                 "frontendIPConfigurations": [
                     {
                         "name": "LoadBalancerFrontEnd",
+						
                         "properties": {
                             "privateIPAllocationMethod": "Static",
                             "subnet": {
