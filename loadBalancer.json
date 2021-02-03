@@ -38,12 +38,6 @@
     "loadBalancerName": {
       "type": "string"
     },
-	 "sku": {
-      "type": "string"
-    },
-	"tier": {
-      "type": "string"
-    },
     "networkSecurityGroupName": {
       "type": "string"
     },
