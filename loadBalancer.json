@@ -124,11 +124,11 @@
       "name": "[parameters('loadBalancerName')]",
       "type": "Microsoft.Network/loadBalancers",
       "location": "[parameters('location')]",
-	  "sku": {
+      "sku": {
                 "name": "Standard",
                 "tier": "Regional"
-		},
-      "dependsOn": [
+            },
+            "dependsOn": [
       ],
                   "properties": {
                 "frontendIPConfigurations": [
