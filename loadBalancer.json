@@ -93,6 +93,10 @@
           "location": {
             "value": "[parameters('location')]"
           },
+		       "sku": {
+            "name": "Standard",
+             "tier": "Regional"
+           },
           "publicIPName": {
             "value": "[parameters('clusterIPAddressName')]"
           },
