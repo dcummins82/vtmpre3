@@ -186,7 +186,7 @@
             ]
           }
         }
-      }
+      },
 	  "zones": "[parameters('zone')]"
     }
   ],
