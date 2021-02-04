@@ -239,7 +239,7 @@
                 "[concat('microsoft.storage/storageaccounts/', parameters('clusterName'), '/blobServices/default')]"
             ]
         }
-    ]
+    ],
   "outputs": {
     "storageAccountId": {
       "value": "[resourceId('Microsoft.Storage/StorageAccounts',variables('storageAccountName'))]",
