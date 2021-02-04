@@ -8,7 +8,9 @@
 				"description": "Name Of The Storage Account"
 			}
         },
-
+  "variables": {
+	"storageAccountName": "[concat(parameters('clusterName'),'presastd01')]",
+  },
 		"location": {
 			"type": "string",
 			"defaultValue": "[resourceGroup().location]",
