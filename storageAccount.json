@@ -169,7 +169,7 @@
   },   
     "resources": [
         {
-            "name": "[parameters('clusterName')]",
+            "name": "[variables('storageAccountName')]",
             "type": "Microsoft.Storage/storageAccounts",
             "ApiVersion": "[parameters('storageAccountsApiVersion')]",
             "location": "[parameters('location')]",
@@ -205,7 +205,7 @@
             "kind": "[parameters('kind')]"
         },
         {
-            "name": "[concat(parameters('clusterName'), '/default')]",
+            "name": "[concat(variables('storageAccountName'), '/default')]",
             "type": "microsoft.storage/storageaccounts/blobServices",
             "ApiVersion": "[parameters('storageAccountsApiVersion')]",
             "properties": {
@@ -223,11 +223,11 @@
                 "isVersioningEnabled": "[parameters('isVersioningEnabled')]"
             },
             "dependsOn": [
-                "[concat('microsoft.storage/storageaccounts/', parameters('clusterName'))]"
+                "[concat('microsoft.storage/storageaccounts/', variables('storageAccountName'))]"
             ]
         },
         {
-            "name": "[concat(parameters('clusterName'), '/default')]",
+            "name": "[concat(variables('storageAccountName'), '/default')]",
             "type": "microsoft.storage/storageaccounts/fileservices",
             "ApiVersion": "[parameters('storageAccountsApiVersion')]",
             "properties": {
@@ -237,8 +237,8 @@
                 }
             },
             "dependsOn": [
-                "[concat('microsoft.storage/storageaccounts/', parameters('clusterName'))]",
-                "[concat('microsoft.storage/storageaccounts/', parameters('clusterName'), '/blobServices/default')]"
+                "[concat('microsoft.storage/storageaccounts/', variables('storageAccountName'))]",
+                "[concat('microsoft.storage/storageaccounts/', variables('storageAccountName'), '/blobServices/default')]"
             ]
         }
     ],
