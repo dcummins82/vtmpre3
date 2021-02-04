@@ -1,39 +1,245 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "location": {
-      "type": "string"
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "clusterName": {
+            "type": "string",
+            "metadata": {
+				"description": "Name Of The Storage Account"
+			}
+        },
+
+		"location": {
+			"type": "string",
+			"defaultValue": "[resourceGroup().location]",
+			"metadata": {
+				"description": "Deployment Location - Defaulted to Resource Group's Location"
+			}
+		},
+
+		"storageAccountsApiVersion": {
+			"type": "string",
+			"defaultValue": "2019-06-01",
+			"allowedValues": [
+				"2019-06-01"
+			],
+			"metadata": {
+				"description": "ARM Template API Version"
+			}
+		},
+
+        "accountType": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues":[
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_ZRS",
+                "Premium_LRS"
+            ],
+			"metadata": {
+				"description": "Storage account type"
+			}
+        },
+
+        "kind": {
+            "type": "string",
+            "defaultValue": "StorageV2",
+            "allowedValues": [
+                "Storage",
+                "StorageV2"
+            ],
+			"metadata": {
+				"description": "Storage account kind"
+			}
+        },
+
+        "accessTier": {
+            "type": "string",
+            "defaultValue": "Hot",
+            "allowedValues":[
+                "Hot",
+                "Cool"
+            ],
+			"metadata": {
+				"description": "Storage account access tier. Select Hot for frequently accessed data"
+			}
+        },
+
+        "minimumTlsVersion": {
+            "type": "string",
+            "defaultValue": "TLS1_2",
+            "allowedValues":[
+                "TLS1_2",
+                "TLS1_1"
+            ],
+			"metadata": {
+				"description": "Storage account tls version - use the latest version"
+			}
+        },
+
+        "allowBlobPublicAccess": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+				"description": "Disables public blob access even if container/blob access is set to anonymous. If set to true, storage account blob will be publicly accessible"
+			}
+        },
+        
+        "isContainerRestoreEnabled": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+				"description": "Enables point-in-time restore for containers. If point-in-time restore is enabled, then versioning, change feed, and blob soft delete must also be enabled."
+			}
+        },
+
+        "containerRestorePeriodDays": {
+            "type": "int",
+            "defaultValue": 6,
+            "minValue": 1,
+            "maxValue": 6,
+            "metadata": {
+				"description": "Maximum restore point in days"
+			}
+        },
+
+        "isBlobSoftDeleteEnabled": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+				"description": "Enables soft delete for blobs"
+			}
+        },
+
+        "blobSoftDeleteRetentionDays": {
+            "type": "int",
+            "defaultValue": 7,
+            "minValue": 1,
+            "maxValue": 365,
+            "metadata": {
+				"description": "Maximum blob soft delete retention period in days"
+			}
+        },
+
+        "isChangeFeedEnabled": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+				"description": "Enables tracking changes to blobs"
+			}
+        },
+
+        "isVersioningEnabled": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+				"description": "Automatically maintains previous versions of blobs for recovery and restoration"
+			}
+        },
+
+        "isShareSoftDeleteEnabled": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+				"description": "Enables soft delete for file shares"
+			}
+        },
+
+        "shareSoftDeleteRetentionDays": {
+            "type": "int",
+            "defaultValue": 7,
+            "minValue": 1,
+            "maxValue": 365,
+            "metadata": {
+				"description": "Maximum file share soft delete retention period in days"
+			}
+        },
+
+        "isInfrastructureEncryptionEnabled": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+				"description": "Enables double encryption. Can only be enabled at deployment time and can't be enabled on existing storage accounts"
+			}
+        }
     },
-    "storageAccountSeed": {
-      "type": "string"
-    },
-    "storageAccountsApiVersion": {
-      "type": "string"
-    },
-    "clusterName": {
-      "type": "string"
-    }
-  },
-  "variables": {
-	"storageAccountName": "[concat(parameters('clusterName'),'presastd01')]",
-  },
-  "resources": [
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[variables('storageAccountName')]",
-      "apiVersion": "[parameters('storageAccountsApiVersion')]",
-      "sku": {
-        "name": "Standard_LRS"
-      },
-      "kind": "StorageV2",
-      "location": "[parameters('location')]",
-      "properties": {
-        "accessTier": "Cool",
-		"supportsHttpsTrafficOnly": "true"
-      }
-    }
-  ],
+    
+    "resources": [
+        {
+            "name": "[parameters('clusterName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "storageAccountsApiVersion": "[parameters('storageAccountsApiVersion')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "accessTier": "[parameters('accessTier')]",
+                "minimumTlsVersion": "[parameters('minimumTlsVersion')]",
+                "supportsHttpsTrafficOnly": true,
+                "allowBlobPublicAccess": "[parameters('allowBlobPublicAccess')]",
+                "encryption": {
+                    "keySource": "Microsoft.Storage",
+                    
+                    "services": {
+                        "blob": {
+                            "enabled": true
+                        },
+                        "file": {
+                            "enabled": true
+                        },
+                        "queue": {
+                            "enabled": true
+                        },
+                        "table": {
+                            "enabled": true
+                        }
+                    },
+                    "requireInfrastructureEncryption": "[parameters('isInfrastructureEncryptionEnabled')]"
+                }
+            },
+            "dependsOn": [],
+            "sku": {
+                "name": "[parameters('accountType')]"
+            },
+            "kind": "[parameters('kind')]"
+        },
+        {
+            "name": "[concat(parameters('clusterName'), '/default')]",
+            "type": "microsoft.storage/storageaccounts/blobServices",
+            "storageAccountsApiVersion": "[parameters('storageAccountsApiVersion')]",
+            "properties": {
+                "restorePolicy": {
+                    "enabled": "[parameters('isContainerRestoreEnabled')]",
+                    "days": "[parameters('containerRestorePeriodDays')]"
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": "[parameters('isBlobSoftDeleteEnabled')]",
+                    "days": "[parameters('blobSoftDeleteRetentionDays')]"
+                },
+                "changeFeed": {
+                    "enabled": "[parameters('isChangeFeedEnabled')]"
+                },
+                "isVersioningEnabled": "[parameters('isVersioningEnabled')]"
+            },
+            "dependsOn": [
+                "[concat('microsoft.storage/storageaccounts/', parameters('clusterName'))]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('clusterName'), '/default')]",
+            "type": "microsoft.storage/storageaccounts/fileservices",
+            "storageAccountsApiVersion": "[parameters('storageAccountsApiVersion')]",
+            "properties": {
+                "shareDeleteRetentionPolicy": {
+                    "enabled": "[parameters('isShareSoftDeleteEnabled')]",
+                    "days": "[parameters('shareSoftDeleteRetentionDays')]"
+                }
+            },
+            "dependsOn": [
+                "[concat('microsoft.storage/storageaccounts/', parameters('clusterName'))]",
+                "[concat('microsoft.storage/storageaccounts/', parameters('clusterName'), '/blobServices/default')]"
+            ]
+        }
+    ]
   "outputs": {
     "storageAccountId": {
       "value": "[resourceId('Microsoft.Storage/StorageAccounts',variables('storageAccountName'))]",
