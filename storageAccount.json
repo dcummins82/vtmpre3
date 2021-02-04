@@ -169,7 +169,7 @@
         {
             "name": "[parameters('clusterName')]",
             "type": "Microsoft.Storage/storageAccounts",
-            "storageAccountsApiVersion": "[parameters('storageAccountsApiVersion')]",
+            "ApiVersion": "[parameters('storageAccountsApiVersion')]",
             "location": "[parameters('location')]",
             "properties": {
                 "accessTier": "[parameters('accessTier')]",
@@ -205,7 +205,7 @@
         {
             "name": "[concat(parameters('clusterName'), '/default')]",
             "type": "microsoft.storage/storageaccounts/blobServices",
-            "storageAccountsApiVersion": "[parameters('storageAccountsApiVersion')]",
+            "ApiVersion": "[parameters('storageAccountsApiVersion')]",
             "properties": {
                 "restorePolicy": {
                     "enabled": "[parameters('isContainerRestoreEnabled')]",
@@ -227,7 +227,7 @@
         {
             "name": "[concat(parameters('clusterName'), '/default')]",
             "type": "microsoft.storage/storageaccounts/fileservices",
-            "storageAccountsApiVersion": "[parameters('storageAccountsApiVersion')]",
+            "ApiVersion": "[parameters('storageAccountsApiVersion')]",
             "properties": {
                 "shareDeleteRetentionPolicy": {
                     "enabled": "[parameters('isShareSoftDeleteEnabled')]",
